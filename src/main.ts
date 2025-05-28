@@ -1,17 +1,36 @@
 //ESECUZIONE
-//Type guards personalizzati 
+//Type guards personalizzati "is" is chefBirthday
 
-//gestisco fetch usando gnerics con funzione di appoggio asincrona
+//gestisco fetch usando gnerics con funzione di appoggio asincrona - RITORNA BOOLEANO
+//type guard verifico se oggetto sconosciuto rispetta struttura del tipo chefBirthday
+//check esistenza proprieta
+//tipo corrispondente a quello dichiarato
+//RITORNA BOOLEANO che conferma che result e effettivamente il valore atteso
 
-
-
-
-type chefBirthday = {
-  birthday: string
+function isChef(dati:unknown): dati is ChefType{//controllo se dati rispecchia type chefBirthday
+  
+  if(dati &&
+    typeof dati === "object" &&
+    dati !== null &&
+      // "id" in chef &&
+      // typeof chef.id === "number" &&
+    "birthDate" in dati &&
+    typeof dati.birthDate === "string"
+  ) {
+    return true
+  }
+  return false
 }
 
-async function getChefBirthday(id: number): Promise<chefBirthday | null> {
-  const response = await fetch(`https://dummyjson.com/recipes/${id}`)
+
+type ChefType = {
+  // id: number
+  birthDate: string
+}
+
+async function getChefBirthday(id: number): Promise<ChefType | null> {
+  try{
+    const response = await fetch(`https://dummyjson.com/recipes/${id}`)
   const recipes = await response.json();
   console.log(recipes)//vedo a ceh punto sono
   const user = await fetch(`https://dummyjson.com/users/${recipes.userId}`)
@@ -19,12 +38,21 @@ async function getChefBirthday(id: number): Promise<chefBirthday | null> {
   //json ci ritorna come promessa qualcosa che risolve un any (dati:any) con unknown non funziona
   //quindi type narrowing per confermare che dati ricevuti siano effettivamente type chefBirthday
   //gestisco fetch usando gnerics con funzione di appoggio asincrona
-
   console.log(chef)
   // return {...recipes, chef} //ritorna promise che risolve quel valore
-  return chef.birthDate
+  if(!isChef(chef)){
+    throw new Error("formato type chef non valido")
+  }
+   return chef.birthDate
+}catch(errore){
+  if(errore instanceof Error){
+    console.error("errore durante recupero dati:", errore.message)
+  } else {
+    console.error("errore sconosciuto", errore)
+  }
+  return null
 }
-
+}
 //INVOCAZIONI
 
 getChefBirthday(1)
