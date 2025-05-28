@@ -1,24 +1,43 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+//ESECUZIONE
+//Type guards personalizzati 
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+//gestisco fetch usando gnerics con funzione di appoggio asincrona
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+
+
+
+type chefBirthday = {
+  birthday: string
+}
+
+async function getChefBirthday(id: number): Promise<chefBirthday | null> {
+  const response = await fetch(`https://dummyjson.com/recipes/${id}`)
+  const recipes = await response.json();
+  console.log(recipes)//vedo a ceh punto sono
+  const user = await fetch(`https://dummyjson.com/users/${recipes.userId}`)
+  const chef = await user.json()
+  //json ci ritorna come promessa qualcosa che risolve un any (dati:any) con unknown non funziona
+  //quindi type narrowing per confermare che dati ricevuti siano effettivamente type chefBirthday
+  //gestisco fetch usando gnerics con funzione di appoggio asincrona
+
+  console.log(chef)
+  // return {...recipes, chef} //ritorna promise che risolve quel valore
+  return chef.birthDate
+}
+
+//INVOCAZIONI
+
+getChefBirthday(1)
+.then(birthday => console.log("Data di nascita dello chef:", birthday))
+.catch(error => console.error("Errore:", error.message));
+
+// (async () => {
+//   try {
+//     const birthday = await getChefBirthday(1)
+//     console.log("Data di nascita dello chef:", birthday)
+//   } catch (error) {
+//     console.error("Errore:", error.message)
+//   }
+//   console.log("Fine!")//lo vediamo perche abbiamo gestito bene
+// })()
+
